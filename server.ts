@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import { config } from './config/index.js';
-import routes from './routes/index.js';
+import { config } from './config/index.ts';
+import routes from './routes/index.ts';
 
 const app = express();
 
@@ -15,5 +15,4 @@ app.use('/', routes);
 // Start server
 app.listen(config.port, () => {
   console.log(`🚀 Backend running on http://localhost:${config.port}`);
-
 });

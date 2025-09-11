@@ -2,17 +2,24 @@
   "name": "chatbot-backend",
   "version": "1.0.0",
   "description": "An OpenAI chatbot backend",
-  "main": "server.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node --esm server.ts",
+    "dev:watch": "nodemon --exec ts-node --esm server.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ZainabIlyas13/chatbot-backend.git"
   },
-  "keywords": ["chatbot", "openai", "api", "backend"],
+  "keywords": [
+    "chatbot",
+    "openai",
+    "api",
+    "backend"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -27,5 +34,13 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }

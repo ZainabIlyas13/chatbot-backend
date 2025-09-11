@@ -1,6 +1,7 @@
 import express from 'express';
-import chatRoutes from './chat.js';
-import healthRoutes from './health.js';
+import type { Request, Response } from 'express';
+import chatRoutes from './chat.ts';
+import healthRoutes from './health.ts';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.use('/chat', chatRoutes);
 router.use('/health', healthRoutes);
 
 // Root endpoint
-router.get('/', (req, res) => {
+router.get('/', (req: Request, res: Response) => {
   res.json({
     message: 'Chatbot Backend API',
     version: '1.0.0',

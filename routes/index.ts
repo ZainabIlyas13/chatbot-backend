@@ -1,7 +1,7 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import chatRoutes from './chat.ts';
-import healthRoutes from './health.ts';
+import chatRoutes from '@/routes/chat.ts';
+import healthRoutes from '@/routes/health.ts';
 
 const router = express.Router();
 

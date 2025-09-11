@@ -9,5 +9,8 @@ export const config = {
     model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
     maxTokens: parseInt(process.env.MAX_TOKENS || '1000'),
     temperature: parseFloat(process.env.TEMPERATURE || '0.7')
+  },
+  openWeatherMap: {
+    apiKey: process.env.OPENWEATHERMAP_API_KEY || ''
   }
 };

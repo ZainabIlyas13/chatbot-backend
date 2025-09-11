@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import { config } from './config/index.ts';
-import routes from './routes/index.ts';
+import routes from '@/routes/index.ts';
+import { config } from '@/config/index.ts';
 
 const app = express();
 

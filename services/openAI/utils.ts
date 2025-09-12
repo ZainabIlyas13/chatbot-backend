@@ -2,7 +2,19 @@ import OpenAI from "openai";
 import { getLocation, getWeather } from "@/functions/index.ts";
 import { appointmentService } from "@/services/appointments/index.ts";
 
-export const systemPrompt = `You are a helpful AI assistant with access to weather, location, and appointment booking functions.
+export const getSystemPrompt = () => {
+  const currentDate = new Date();
+  const isoDate = currentDate.toISOString().split('T')[0];
+  const readableDate = currentDate.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
+  return `You are a helpful AI assistant with access to weather, location, and appointment booking functions.
+
+CURRENT DATE: ${isoDate} (${readableDate})
 
 CRITICAL INSTRUCTION: You have access to these functions and MUST use them when appropriate:
 - getWeather: For ANY weather questions (temperature, conditions, etc.)
@@ -15,9 +27,12 @@ CRITICAL INSTRUCTION: You have access to these functions and MUST use them when 
 
 When a user asks about weather, location, or appointments, you MUST call the appropriate function. Do not say you don't have access to real-time data or appointment management - you do have access through these functions.
 
+For appointments, always use current or future dates. Never suggest dates in the past unless specifically requested.
+
 You can also answer general questions, provide explanations, help with coding, writing, analysis, and much more.
 
 Be friendly, helpful, and provide accurate, detailed responses.`;
+};
 
 
 // Define available tools

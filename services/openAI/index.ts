@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { config } from '@/config/index.ts';
 import { ChatRole, type ChatMessage } from '@/types/index.ts';
-import { executeToolCall, systemPrompt, tools } from './utils.ts';
+import { executeToolCall, getSystemPrompt, tools } from './utils.ts';
 
 class OpenAIService {
   private client: OpenAI;
@@ -16,7 +16,7 @@ class OpenAIService {
     // Add system prompt if not already present
     const messagesWithSystem = messages.some(message => message.role === ChatRole.SYSTEM) 
       ? messages 
-      : [{ role: ChatRole.SYSTEM as const, content: systemPrompt }, ...messages];
+      : [{ role: ChatRole.SYSTEM as const, content: getSystemPrompt() }, ...messages];
 
     const response = await this.client.chat.completions.create({
       model: config.openai.model,

@@ -15,7 +15,8 @@
       "@/routes/*": ["./routes/*"],
       "@/services/*": ["./services/*"],
       "@/functions/*": ["./functions/*"],
-      "@/types/*": ["./types/*"]
+      "@/types/*": ["./types/*"],
+      "@/lib/*": ["./lib/*"]
     },
     "strict": true,
     "skipLibCheck": true,

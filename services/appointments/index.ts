@@ -1,4 +1,4 @@
-import { prisma } from '../../lib/prisma.ts';
+import { prisma } from '@/lib/prisma.ts';
 import type { 
   CreateAppointmentArgs, 
   UpdateAppointmentArgs, 
@@ -9,12 +9,41 @@ class AppointmentService {
   // Create a new appointment
   createAppointment = async (args: CreateAppointmentArgs) => {
     try {
+      const appointmentDate = new Date(args.date);
+      const duration = args.duration || 60;
+      const endTime = new Date(appointmentDate.getTime() + duration * 60000);
+
+      // Check for overlapping appointments
+      const existingAppointments = await prisma.appointment.findMany({
+        where: {
+          status: {
+            in: ['scheduled', 'confirmed']
+          }
+        }
+      });
+
+      // Check for time conflicts
+      const hasConflict = existingAppointments.some(existing => {
+        const existingStart = existing.date;
+        const existingEnd = new Date(existingStart.getTime() + existing.duration * 60000);
+        
+        // Check if new appointment overlaps with existing appointment
+        return (appointmentDate < existingEnd && endTime > existingStart);
+      });
+
+      if (hasConflict) {
+        return {
+          success: false,
+          error: 'Time slot is already booked. Please choose a different time.'
+        };
+      }
+
       const appointment = await prisma.appointment.create({
         data: {
           title: args.title,
           description: args.description,
-          date: new Date(args.date),
-          duration: args.duration || 60,
+          date: appointmentDate,
+          duration: duration,
           clientName: args.clientName,
           clientEmail: args.clientEmail,
           clientPhone: args.clientPhone,

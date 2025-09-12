@@ -65,16 +65,16 @@ class AppointmentService {
   }
 
   // Get all appointments
-  getAppointments = async (status?: string, clientEmail?: string) => {
+  getAppointments = async (args: { status?: string; clientEmail?: string }) => {
     try {
       const where: { status?: string; clientEmail?: string } = {};
 
-      if (status) {
-        where.status = status;
+      if (args.status) {
+        where.status = args.status;
       }
 
-      if (clientEmail) {
-        where.clientEmail = clientEmail;
+      if (args.clientEmail) {
+        where.clientEmail = args.clientEmail;
       }
 
       const appointments = await prisma.appointment.findMany({
@@ -169,12 +169,12 @@ class AppointmentService {
   }
 
   // Delete an appointment by client email and date
-  deleteAppointment = async (clientEmail: string, date?: string) => {
+  deleteAppointment = async (args: { clientEmail: string; date?: string }) => {
     try {
-      let whereClause: { clientEmail: string; date?: Date } = { clientEmail: clientEmail };
+      let whereClause: { clientEmail: string; date?: Date } = { clientEmail: args.clientEmail };
 
-      if (date) {
-        whereClause.date = new Date(date);
+      if (args.date) {
+        whereClause.date = new Date(args.date);
       }
 
       // Find the appointment(s)
@@ -191,7 +191,7 @@ class AppointmentService {
       }
 
       // If multiple appointments found and no specific date, ask for clarification
-      if (appointments.length > 1 && !date) {
+      if (appointments.length > 1 && !args.date) {
         return {
           success: false,
           error: 'Multiple appointments found. Please specify the date.',
@@ -231,10 +231,10 @@ class AppointmentService {
   }
 
   // Get appointment by ID
-  getAppointmentById = async (id: string) => {
+  getAppointmentById = async (args: { id: string }) => {
     try {
       const appointment = await prisma.appointment.findUnique({
-        where: { id: id }
+        where: { id: args.id }
       });
 
       if (!appointment) {

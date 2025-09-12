@@ -221,11 +221,9 @@ const functionImplementations = {
   getWeather,
   getLocation,
   createAppointment: appointmentService.createAppointment,
-  getAppointments: (args: { status?: string; clientEmail?: string }) => 
-    appointmentService.getAppointments(args.status, args.clientEmail),
+  getAppointments: appointmentService.getAppointments,
   updateAppointment: appointmentService.updateAppointment,
-  deleteAppointment: (args: { clientEmail: string; date?: string }) => 
-    appointmentService.deleteAppointment(args.clientEmail, args.date),
+  deleteAppointment: appointmentService.deleteAppointment,
 };
 
 // Execute a tool call

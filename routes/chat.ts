@@ -1,6 +1,6 @@
 import express from 'express';
 import type { Request, Response } from 'express';
-import { openaiService } from '@/services/openAI/service.ts';
+import { openaiService } from '@/services/openAI/index.ts';
 import type { ChatResponse, ChatRequest } from '@/types/index.ts';
 
 const router = express.Router();

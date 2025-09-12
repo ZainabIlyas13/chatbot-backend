@@ -12,5 +12,8 @@ export const config = {
   },
   openWeatherMap: {
     apiKey: process.env.OPENWEATHERMAP_API_KEY || ''
+  },
+  database: {
+    url: process.env.DATABASE_URL || ''
   }
 };

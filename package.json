@@ -7,8 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node --esm server.ts",
-    "dev:watch": "nodemon --exec ts-node --esm server.ts"
+    "dev": "tsx server.ts",
+    "dev:watch": "nodemon --exec tsx server.ts"
   },
   "repository": {
     "type": "git",
@@ -27,10 +27,13 @@
   },
   "homepage": "https://github.com/ZainabIlyas13/chatbot-backend#readme",
   "dependencies": {
+    "@prisma/client": "^6.16.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "openai": "^5.20.0"
+    "openai": "^5.20.0",
+    "pg": "^8.16.3",
+    "prisma": "^6.16.1"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -39,6 +42,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
+    "@types/pg": "^8.15.5",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",

@@ -15,6 +15,7 @@ export const getSystemPrompt = () => {
   return `You are a helpful AI assistant with access to weather, location, and appointment booking functions.
 
 CURRENT DATE: ${isoDate} (${readableDate})
+You are going to make appointments for 2025
 
 CRITICAL INSTRUCTION: You have access to these functions and MUST use them when appropriate:
 - getWeather: For ANY weather questions (temperature, conditions, etc.)
@@ -23,11 +24,17 @@ CRITICAL INSTRUCTION: You have access to these functions and MUST use them when 
 - getAppointments: For viewing existing appointments
 - updateAppointment: For modifying appointment details
 - deleteAppointment: For cancelling appointments
-- getAppointmentById: For getting specific appointment details
 
 When a user asks about weather, location, or appointments, you MUST call the appropriate function. Do not say you don't have access to real-time data or appointment management - you do have access through these functions.
 
-For appointments, always use current or future dates. Never suggest dates in the past unless specifically requested.
+APPOINTMENT BOOKING GUIDELINES:
+- For appointments, always use current or future dates. Never suggest dates in the past unless specifically requested.
+- When creating appointments, use reasonable defaults for optional fields:
+  - If no duration is specified, use 60 minutes
+  - If no description is provided, use a simple description like "Appointment with [client name]"
+  - If no phone number is provided, that's fine - it's optional
+- Be proactive and create appointments with the information provided. Don't ask for optional details unless absolutely necessary.
+- If you have the minimum required information (title, date, client name, client email), proceed with creating the appointment.
 
 You can also answer general questions, provide explanations, help with coding, writing, analysis, and much more.
 
@@ -80,7 +87,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
       type: 'function',
       function: {
         name: 'createAppointment',
-        description: 'Create a new appointment booking',
+        description: 'Create a new appointment booking. Use defaults for optional fields if not provided.',
         parameters: {
           type: 'object',
           properties: {
@@ -90,15 +97,15 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
             },
             description: {
               type: 'string',
-              description: 'Description of the appointment'
+              description: 'Description of the appointment (optional - will use default if not provided)'
             },
             date: {
               type: 'string',
-              description: 'Date and time of the appointment in ISO format (e.g., 2024-01-15T14:30:00Z)'
+              description: 'Date and time of the appointment in ISO format (e.g., 2025-01-15T14:30:00Z)'
             },
             duration: {
               type: 'number',
-              description: 'Duration of the appointment in minutes (default: 60)'
+              description: 'Duration of the appointment in minutes (optional - defaults to 60)'
             },
             clientName: {
               type: 'string',
@@ -110,7 +117,7 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
             },
             clientPhone: {
               type: 'string',
-              description: 'Phone number of the client'
+              description: 'Phone number of the client (optional)'
             }
           },
           required: ['title', 'date', 'clientName', 'clientEmail']
@@ -208,33 +215,17 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
         }
       }
     },
-    {
-      type: 'function',
-      function: {
-        name: 'getAppointmentById',
-        description: 'Get a specific appointment by its ID',
-        parameters: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              description: 'ID of the appointment to retrieve'
-            }
-          },
-          required: ['id']
-        }
-      }
-    }
   ];
 
 const functionImplementations = {
   getWeather,
   getLocation,
   createAppointment: appointmentService.createAppointment,
-  getAppointments: appointmentService.getAppointments,
+  getAppointments: (args: { status?: string; clientEmail?: string }) => 
+    appointmentService.getAppointments(args.status, args.clientEmail),
   updateAppointment: appointmentService.updateAppointment,
-  deleteAppointment: appointmentService.deleteAppointment,
-  getAppointmentById: appointmentService.getAppointmentById
+  deleteAppointment: (args: { clientEmail: string; date?: string }) => 
+    appointmentService.deleteAppointment(args.clientEmail, args.date),
 };
 
 // Execute a tool call

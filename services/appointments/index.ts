@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma.ts';
-import type { 
-  CreateAppointmentArgs, 
-  UpdateAppointmentArgs, 
+import type {
+  CreateAppointmentArgs,
+  UpdateAppointmentArgs,
   Appointment
 } from '@/types/index.ts';
 
@@ -26,7 +26,7 @@ class AppointmentService {
       const hasConflict = existingAppointments.some(existing => {
         const existingStart = existing.date;
         const existingEnd = new Date(existingStart.getTime() + existing.duration * 60000);
-        
+
         // Check if new appointment overlaps with existing appointment
         return (appointmentDate < existingEnd && endTime > existingStart);
       });
@@ -41,12 +41,12 @@ class AppointmentService {
       const appointment = await prisma.appointment.create({
         data: {
           title: args.title,
-          description: args.description,
+          description: args.description || `Appointment with ${args.clientName}`,
           date: appointmentDate,
           duration: duration,
           clientName: args.clientName,
           clientEmail: args.clientEmail,
-          clientPhone: args.clientPhone,
+          clientPhone: args.clientPhone || null,
           status: 'scheduled'
         }
       });
@@ -65,19 +65,16 @@ class AppointmentService {
   }
 
   // Get all appointments
-  getAppointments = async (args: {
-    status?: string;
-    clientEmail?: string;
-  }) => {
+  getAppointments = async (status?: string, clientEmail?: string) => {
     try {
       const where: { status?: string; clientEmail?: string } = {};
-      
-      if (args.status) {
-        where.status = args.status;
+
+      if (status) {
+        where.status = status;
       }
-      
-      if (args.clientEmail) {
-        where.clientEmail = args.clientEmail;
+
+      if (clientEmail) {
+        where.clientEmail = clientEmail;
       }
 
       const appointments = await prisma.appointment.findMany({
@@ -102,7 +99,7 @@ class AppointmentService {
   updateAppointment = async (args: UpdateAppointmentArgs) => {
     try {
       let whereClause: { clientEmail: string; date?: Date } = { clientEmail: args.clientEmail };
-      
+
       if (args.date) {
         whereClause.date = new Date(args.date);
       }
@@ -172,15 +169,12 @@ class AppointmentService {
   }
 
   // Delete an appointment by client email and date
-  deleteAppointment = async (args: {
-    clientEmail: string;
-    date?: string;
-  }) => {
+  deleteAppointment = async (clientEmail: string, date?: string) => {
     try {
-      let whereClause: { clientEmail: string; date?: Date } = { clientEmail: args.clientEmail };
-      
-      if (args.date) {
-        whereClause.date = new Date(args.date);
+      let whereClause: { clientEmail: string; date?: Date } = { clientEmail: clientEmail };
+
+      if (date) {
+        whereClause.date = new Date(date);
       }
 
       // Find the appointment(s)
@@ -197,7 +191,7 @@ class AppointmentService {
       }
 
       // If multiple appointments found and no specific date, ask for clarification
-      if (appointments.length > 1 && !args.date) {
+      if (appointments.length > 1 && !date) {
         return {
           success: false,
           error: 'Multiple appointments found. Please specify the date.',
@@ -218,7 +212,7 @@ class AppointmentService {
 
       return {
         success: true,
-        data: { 
+        data: {
           deleted: true,
           appointment: {
             title: appointmentToDelete.title,
@@ -237,12 +231,10 @@ class AppointmentService {
   }
 
   // Get appointment by ID
-  getAppointmentById = async (args: {
-    id: string;
-  }) => {
+  getAppointmentById = async (id: string) => {
     try {
       const appointment = await prisma.appointment.findUnique({
-        where: { id: args.id }
+        where: { id: id }
       });
 
       if (!appointment) {
@@ -264,6 +256,7 @@ class AppointmentService {
       };
     }
   }
+
 }
 
 // Export singleton instance

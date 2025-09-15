@@ -206,8 +206,8 @@ export const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   ];
 
 const functionImplementations = {
-  getWeather,
-  getLocation,
+  getWeather: (args: { location: string; unit?: string }) => getWeather(args.location, args.unit),
+  getLocation: (args: { query: string }) => getLocation(args.query),
   createAppointment: appointmentService.createAppointment,
   getAppointments: appointmentService.getAppointments,
   updateAppointment: appointmentService.updateAppointment,

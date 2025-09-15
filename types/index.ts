@@ -4,6 +4,12 @@ export enum ChatRole {
     ASSISTANT = 'assistant',
     SYSTEM = 'system',
   }
+
+export enum TemperatureUnit {
+  CELSIUS = 'celsius',
+  FAHRENHEIT = 'fahrenheit',
+  KELVIN = 'kelvin'
+}
   
 export interface ChatMessage {
   role: ChatRole;

@@ -12,61 +12,89 @@ class OpenAIService {
     });
   }
 
-  async processChat(messages: ChatMessage[]) {
+  async processChat(messages: ChatMessage[], res: any) {
     // Add system prompt if not already present
     const messagesWithSystem = messages.some(message => message.role === ChatRole.SYSTEM) 
       ? messages 
       : [{ role: ChatRole.SYSTEM as const, content: getSystemPrompt }, ...messages];
 
-    const response = await this.client.chat.completions.create({
-      model: config.openai.model,
-      messages: messagesWithSystem,
-      max_tokens: config.openai.maxTokens,
-      temperature: config.openai.temperature,
-      tools: tools,
-      tool_choice: 'auto'
-    });
-    
-    const message = response.choices[0].message;
-
-    // Check if the model wants to call a tool
-    if (message.tool_calls && message.tool_calls.length > 0) {
-      const toolCall = message.tool_calls[0];
+    try {
+      // First, check if we need to call tools (non-streaming)
+      const response = await this.client.chat.completions.create({
+        model: config.openai.model,
+        messages: messagesWithSystem,
+        max_tokens: config.openai.maxTokens,
+        temperature: config.openai.temperature,
+        tools: tools,
+        tool_choice: 'auto'
+      });
       
-      if (toolCall.type === 'function') {        
-        // Execute the tool call
-        const toolResult = await executeToolCall(toolCall);
-        
-        // Add the tool result to the conversation
-        const messagesWithTool = [
-          ...messagesWithSystem,
-          message,
-          {
-            role: 'tool' as const,
-            content: JSON.stringify(toolResult),
-            tool_call_id: toolCall.id
-          }
-        ];
+      const message = response.choices[0].message;
 
-        // Get the final response after tool execution
-        const finalResponse = await this.client.chat.completions.create({
+      // If tool calls are needed, execute them first
+      if (message.tool_calls && message.tool_calls.length > 0) {
+        const toolCall = message.tool_calls[0];
+        
+        if (toolCall.type === 'function') {
+          // Execute the tool call
+          const toolResult = await executeToolCall(toolCall);
+          
+          // Add the tool result to the conversation
+          const messagesWithTool = [
+            ...messagesWithSystem,
+            message,
+            {
+              role: 'tool' as const,
+              content: JSON.stringify(toolResult),
+              tool_call_id: toolCall.id
+            }
+          ];
+
+          // Now stream the final response
+          const finalStream = await this.client.chat.completions.create({
+            model: config.openai.model,
+            messages: messagesWithTool,
+            max_tokens: config.openai.maxTokens,
+            temperature: config.openai.temperature,
+            stream: true
+          });
+
+          // Stream the final response
+          for await (const chunk of finalStream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            }
+          }
+        }
+      } else {
+        // No tool calls needed, stream the response directly
+        const stream = await this.client.chat.completions.create({
           model: config.openai.model,
-          messages: messagesWithTool,
+          messages: messagesWithSystem,
           max_tokens: config.openai.maxTokens,
-          temperature: config.openai.temperature
+          temperature: config.openai.temperature,
+          stream: true
         });
 
-        return {
-          choices: finalResponse.choices as Array<{ message: { role: string; content: string } }>
-        };
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content;
+          if (content) {
+            res.write(`data: ${JSON.stringify({ content })}\n\n`);
+          }
+        }
       }
+
+      res.write('data: [DONE]\n\n');
+      res.end();
+
+    } catch (error) {
+      console.error('Streaming error:', error);
+      res.write(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`);
+      res.end();
     }
-    
-    // No tool call needed, return the response directly
-    return {
-      choices: response.choices as Array<{ message: { role: string; content: string } }>
-    };
   }
+
 
   async testConnection(): Promise<boolean> {
     try {

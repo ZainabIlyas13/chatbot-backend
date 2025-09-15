@@ -16,7 +16,7 @@ class OpenAIService {
     // Add system prompt if not already present
     const messagesWithSystem = messages.some(message => message.role === ChatRole.SYSTEM) 
       ? messages 
-      : [{ role: ChatRole.SYSTEM as const, content: getSystemPrompt() }, ...messages];
+      : [{ role: ChatRole.SYSTEM as const, content: getSystemPrompt }, ...messages];
 
     const response = await this.client.chat.completions.create({
       model: config.openai.model,

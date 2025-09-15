@@ -2,19 +2,8 @@ import OpenAI from "openai";
 import { getLocation, getWeather } from "@/functions/index.ts";
 import { appointmentService } from "@/services/appointments/index.ts";
 
-export const getSystemPrompt = () => {
-  const currentDate = new Date();
-  const isoDate = currentDate.toISOString().split('T')[0];
-  const readableDate = currentDate.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
+export const getSystemPrompt = `You are a helpful AI assistant with access to weather, location, and appointment booking functions.
 
-  return `You are a helpful AI assistant with access to weather, location, and appointment booking functions.
-
-CURRENT DATE: ${isoDate} (${readableDate})
 You are going to make appointments for 2025
 
 CRITICAL INSTRUCTION: You have access to these functions and MUST use them when appropriate:
@@ -28,7 +17,7 @@ CRITICAL INSTRUCTION: You have access to these functions and MUST use them when 
 When a user asks about weather, location, or appointments, you MUST call the appropriate function. Do not say you don't have access to real-time data or appointment management - you do have access through these functions.
 
 APPOINTMENT BOOKING GUIDELINES:
-- For appointments, always use current or future dates. Never suggest dates in the past unless specifically requested.
+- For appointments, ONLY use dates in 2025 that are current or future. Never suggest dates from previous years, previous months in 2025.
 - When creating appointments, use reasonable defaults for optional fields:
   - If no duration is specified, use 60 minutes
   - If no description is provided, use a simple description like "Appointment with [client name]"
@@ -39,7 +28,6 @@ APPOINTMENT BOOKING GUIDELINES:
 You can also answer general questions, provide explanations, help with coding, writing, analysis, and much more.
 
 Be friendly, helpful, and provide accurate, detailed responses.`;
-};
 
 
 // Define available tools

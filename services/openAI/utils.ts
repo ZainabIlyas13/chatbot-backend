@@ -27,6 +27,8 @@ APPOINTMENT BOOKING GUIDELINES:
 
 You can also answer general questions, provide explanations, help with coding, writing, analysis, and much more.
 
+FORMATTING: Always respond in Markdown format.
+
 Be friendly, helpful, and provide accurate, detailed responses.`;
 
 
